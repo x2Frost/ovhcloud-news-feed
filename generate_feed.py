@@ -1,71 +1,87 @@
-
 import feedparser
 from feedgen.feed import FeedGenerator
 from datetime import datetime
+import requests
+from bs4 import BeautifulSoup
 
-# Liste des flux OVHcloud
-sources = [
+# ==============================
+# 🔗 Flux RSS OVHcloud à agréger
+# ==============================
+SOURCES = [
     "https://www.ovhcloud.com/fr/blog/feed/",
     "https://press.ovhcloud.com/feed/",
     "https://www.ovhcloud.com/fr/blog/tag/telecom/feed/"
 ]
 
-# Création du flux fusionné
+# ==============================
+# ⚙️ Fonctions utilitaires
+# ==============================
+
+def clean_html(text: str) -> str:
+    """Nettoie le HTML pour ne garder que le texte brut."""
+    return BeautifulSoup(text or "", "html.parser").get_text()
+
+
+def safe_parse(url: str):
+    """Récupère un flux RSS en toute sécurité."""
+    try:
+        print(f"🔄 Récupération du flux : {url}")
+        response = requests.get(url, timeout=10)
+        response.raise_for_status()
+        feed = feedparser.parse(response.text)
+        if not feed.entries:
+            print(f"⚠️ Aucun article trouvé dans {url}")
+        return feed
+    except Exception as e:
+        print(f"❌ Erreur sur {url} : {e}")
+        return None
+
+
+# ==============================
+# 🧩 Création du flux fusionné
+# ==============================
+
 fg = FeedGenerator()
-fg.title('Actualités OVHcloud (blog + presse + télécom)')
-fg.link(href='https://ovhcloud.com', rel='alternate')
-fg.description('Flux RSS regroupant toutes les actualités OVHcloud')
-fg.language('fr')
+fg.title("Actualités OVHcloud (blog + presse + télécom)")
+fg.link(href="https://www.ovhcloud.com/fr/", rel="alternate")
+fg.description(f"Flux RSS regroupant toutes les actualités OVHcloud — mis à jour le {datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S UTC')}")
+fg.language("fr")
 
-# Parcourir et fusionner les flux
-for url in sources:
-    feed = safe_parse(url)
-if not feed:
-    continue
-    for entry in feed.entries:
-        fe = fg.add_entry()
-        fe.title(entry.title)
-        fe.link(href=entry.link)
-        fe.published(getattr(entry, 'published', datetime.utcnow().isoformat()))
-        fe.description(getattr(entry, 'summary', ''))
+# ==============================
+# 📡 Lecture et fusion des flux
+# ==============================
 
-# Génération du fichier RSS
-fg.rss_file('rss.xml')
-
-print("✅ Flux RSS généré : rss.xml")
-
-# Récupération et fusion
 entries = []
-for url in sources:
-    feed = feedparser.parse(url)
+
+for url in SOURCES:
+    feed = safe_parse(url)
+    if not feed:
+        continue
     entries.extend(feed.entries)
 
-# Tri par date (si dispo)
-entries.sort(key=lambda e: getattr(e, 'published_parsed', None) or datetime.utcnow(), reverse=True)
+# ==============================
+# 🕒 Tri chronologique décroissant
+# ==============================
+
+entries.sort(
+    key=lambda e: getattr(e, "published_parsed", None) or datetime.utcnow(),
+    reverse=True
+)
+
+# ==============================
+# 📰 Ajout des entrées dans le flux
+# ==============================
 
 for entry in entries:
     fe = fg.add_entry()
     fe.title(entry.title)
     fe.link(href=entry.link)
-    fe.published(getattr(entry, 'published', datetime.utcnow().isoformat()))
-    fe.description(getattr(entry, 'summary', ''))
+    fe.description(clean_html(getattr(entry, "summary", "")))
+    fe.published(getattr(entry, "published", datetime.utcnow().isoformat()))
 
-import requests
+# ==============================
+# 💾 Génération du fichier RSS
+# ==============================
 
-def safe_parse(url):
-    try:
-        response = requests.get(url, timeout=10)
-        response.raise_for_status()
-        return feedparser.parse(response.text)
-    except Exception as e:
-        print(f"⚠️ Erreur sur {url}: {e}")
-        return None
-
-fg.description(f"Flux RSS regroupant les actualités OVHcloud — mis à jour le {datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S UTC')}")
-from bs4 import BeautifulSoup
-
-def clean_html(text):
-    return BeautifulSoup(text, "html.parser").get_text()
-
-# puis :
-fe.description(clean_html(getattr(entry, 'summary', '')))
+fg.rss_file("rss.xml")
+print("✅ Flux RSS généré avec succès : rss.xml")
