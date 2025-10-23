@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Actualités OVHcloud</title>
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      background-color: #f7f7f9;
+      color: #222;
+      margin: 2rem auto;
+      max-width: 900px;
+      line-height: 1.6;
+    }
+    h1 {
+      color: #0050d7;
+      text-align: center;
+      margin-bottom: 1rem;
+    }
+    .article {
+      background: #fff;
+      padding: 1rem 1.5rem;
+      border-radius: 12px;
+      box-shadow: 0 1px 5px rgba(0,0,0,0.1);
+      margin-bottom: 1rem;
+    }
+    a {
+      color: #0050d7;
+      text-decoration: none;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
+    small {
+      color: #555;
+      display: block;
+      margin-bottom: 0.5rem;
+    }
+    footer {
+      text-align: center;
+      margin-top: 2rem;
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+  <h1>🛰️ Actualités OVHcloud</h1>
+  <div id="feed">Chargement en cours...</div>
+
+  <footer>
+    <p>Dernière mise à jour automatique via GitHub Actions</p>
+  </footer>
+
+  <script>
+    async function loadFeed() {
+      try {
+        const response = await fetch('feed.json');
+        const data = await response.json();
+        const container = document.getElementById('feed');
+        container.innerHTML = '';
+
+        data.entries.forEach(entry => {
+          const article = document.createElement('div');
+          article.className = 'article';
+          article.innerHTML = `
+            <a href="${entry.link}" target="_blank"><h2>${entry.title}</h2></a>
+            <small>Publié le : ${entry.published || 'date inconnue'}</small>
+            <p>${entry.summary}</p>
+          `;
+          container.appendChild(article);
+        });
+      } catch (error) {
+        document.getElementById('feed').innerText = 'Erreur de chargement du flux.';
+        console.error(error);
+      }
+    }
+
+    loadFeed();
+  </script>
+</body>
+</html>
