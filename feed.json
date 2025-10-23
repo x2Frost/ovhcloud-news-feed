@@ -1,3 +1,31 @@
+{
+  "title": "Actualités OVHcloud (blog + presse + télécom)",
+  "updated": "2025-10-23T12:00:00Z",
+  "source_count": 3,
+  "failed_sources": [],
+  "entries": [
+    {
+      "title": "OVHcloud annonce de nouvelles fonctionnalités Télécom",
+      "link": "https://www.ovhcloud.com/fr/blog/nouvelles-fonctionnalites-telecom/",
+      "published": "2025-10-22T14:00:00Z",
+      "summary": "OVHcloud étend sa gamme de services télécom avec de nouvelles options pour les entreprises et les particuliers."
+    },
+    {
+      "title": "Blog OVHcloud : Guide complet sur les serveurs cloud",
+      "link": "https://www.ovhcloud.com/fr/blog/guide-serveurs-cloud/",
+      "published": "2025-10-21T09:30:00Z",
+      "summary": "Découvrez toutes les bonnes pratiques pour configurer et sécuriser vos serveurs cloud avec OVHcloud."
+    },
+    {
+      "title": "Communiqué de presse : OVHcloud ouvre un nouveau datacenter",
+      "link": "https://press.ovhcloud.com/nouveau-datacenter/",
+      "published": "2025-10-20T12:00:00Z",
+      "summary": "OVHcloud renforce son infrastructure en Europe avec l’ouverture d’un nouveau datacenter haute performance."
+    }
+  ]
+}
+
+
 git add feed.json
 git commit -m "Mise à jour feed.json"
 git push origin main
