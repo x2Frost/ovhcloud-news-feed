@@ -1,25 +1,91 @@
-{
-  "title": "Actualités OVHcloud (blog + presse + télécom)",
-  "updated": "2025-10-23T10:30:00Z",
-  "source_count": 3,
-  "entries": [
-    {
-      "title": "OVHcloud annonce de nouvelles fonctionnalités Télécom",
-      "link": "https://www.ovhcloud.com/fr/blog/nouvelles-fonctionnalites-telecom/",
-      "published": "2025-10-22T14:00:00Z",
-      "summary": "OVHcloud étend sa gamme de services télécom avec de nouvelles options pour les entreprises et les particuliers."
-    },
-    {
-      "title": "Blog OVHcloud : Guide complet sur les serveurs cloud",
-      "link": "https://www.ovhcloud.com/fr/blog/guide-serveurs-cloud/",
-      "published": "2025-10-21T09:30:00Z",
-      "summary": "Découvrez toutes les bonnes pratiques pour configurer et sécuriser vos serveurs cloud avec OVHcloud."
-    },
-    {
-      "title": "Communiqué de presse : OVHcloud ouvre un nouveau datacenter",
-      "link": "https://press.ovhcloud.com/nouveau-datacenter/",
-      "published": "2025-10-20T12:00:00Z",
-      "summary": "OVHcloud renforce son infrastructure en Europe avec l’ouverture d’un nouveau datacenter haute performance."
-    }
-  ]
+import feedparser
+from feedgen.feed import FeedGenerator
+from datetime import datetime
+import requests
+from bs4 import BeautifulSoup
+import json
+
+# ==============================
+# 🔗 Flux RSS OVHcloud à agréger
+# ==============================
+SOURCES = [
+    "https://www.ovhcloud.com/fr/blog/feed/",
+    "https://press.ovhcloud.com/feed/",
+    "https://www.ovhcloud.com/fr/blog/tag/telecom/feed/"
+]
+
+# ==============================
+# ⚙️ Fonctions utilitaires
+# ==============================
+def clean_html(text: str) -> str:
+    """Nettoie le HTML pour ne garder que le texte brut."""
+    return BeautifulSoup(text or "", "html.parser").get_text()
+
+def safe_parse(url: str):
+    """Récupère un flux RSS en toute sécurité."""
+    try:
+        print(f"🔄 Récupération du flux : {url}")
+        response = requests.get(url, timeout=10)
+        response.raise_for_status()
+        feed = feedparser.parse(response.text)
+        if not feed.entries:
+            print(f"⚠️ Aucun article trouvé dans {url}")
+        return feed
+    except Exception as e:
+        print(f"❌ Erreur sur {url} : {e}")
+        return None
+
+# ==============================
+# 🧩 Création du flux RSS fusionné
+# ==============================
+fg = FeedGenerator()
+fg.title("Actualités OVHcloud (blog + presse + télécom)")
+fg.link(href="https://www.ovhcloud.com/fr/", rel="alternate")
+fg.description(f"Flux RSS regroupant toutes les actualités OVHcloud — mis à jour le {datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S UTC')}")
+fg.language("fr")
+
+entries = []
+
+for url in SOURCES:
+    feed = safe_parse(url)
+    if not feed:
+        continue
+    entries.extend(feed.entries)
+
+# Tri par date décroissante
+entries.sort(key=lambda e: getattr(e, "published_parsed", None) or datetime.utcnow(), reverse=True)
+
+# Ajout au flux RSS
+for entry in entries:
+    fe = fg.add_entry()
+    fe.title(entry.title)
+    fe.link(href=entry.link)
+    fe.description(clean_html(getattr(entry, "summary", "")))
+    fe.published(getattr(entry, "published", datetime.utcnow().isoformat()))
+
+# Génération du fichier RSS
+fg.rss_file("rss.xml")
+print("✅ Flux RSS généré : rss.xml")
+
+# ==============================
+# 💾 Génération du fichier JSON
+# ==============================
+json_feed = {
+    "title": "Actualités OVHcloud (blog + presse + télécom)",
+    "updated": datetime.utcnow().isoformat(),
+    "source_count": len(SOURCES),
+    "entries": []
 }
+
+for entry in entries:
+    json_feed["entries"].append({
+        "title": entry.title,
+        "link": entry.link,
+        "published": getattr(entry, "published", ""),
+        "summary": clean_html(getattr(entry, "summary", ""))
+    })
+
+with open("feed.json", "w", encoding="utf-8") as f:
+    json.dump(json_feed, f, ensure_ascii=False, indent=2)
+
+print("✅ Flux JSON généré : feed.json")
