@@ -1,10 +1,3 @@
-import feedparser
-from feedgen.feed import FeedGenerator
-from datetime import datetime
-import requests
-from bs4 import BeautifulSoup
-import json
-
 # ==============================
 # 🔗 Flux RSS OVHcloud à agréger
 # ==============================
