@@ -5,138 +5,202 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Actualités OVHcloud</title>
   <link rel="icon" href="favicon.png" type="image/png">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
   <style>
     :root {
       --primary: #0050d7;
-      --bg-light: #f8f9fa;
-      --bg-dark: #1e1e28;
-      --text-light: #222;
-      --text-dark: #eee;
-      --card-light: #fff;
-      --card-dark: #2b2f3b;
-      --shadow: rgba(0,0,0,0.1);
+      --bg-light: #f5f7fa;
+      --bg-dark: #12141b;
+      --text-light: #1c1f26;
+      --text-dark: #f2f2f2;
+      --card-light: rgba(255, 255, 255, 0.9);
+      --card-dark: rgba(35, 38, 49, 0.7);
+      --border-light: #e2e4ea;
+      --shadow: rgba(0,0,0,0.08);
     }
 
-    @media (prefers-color-scheme: dark) {
-      body { background: var(--bg-dark); color: var(--text-dark); }
-      .article { background: var(--card-dark); color: var(--text-dark); }
-      input { background: #2a2a36; color: #eee; border-color: #444; }
-    }
+    * { box-sizing: border-box; }
 
     body {
       font-family: "Inter", system-ui, sans-serif;
       background: var(--bg-light);
       color: var(--text-light);
-      margin: 0 auto;
-      max-width: 900px;
-      padding: 1rem 1rem 3rem;
+      margin: 0;
       transition: background 0.3s, color 0.3s;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      body { background: var(--bg-dark); color: var(--text-dark); }
+      .card { background: var(--card-dark); backdrop-filter: blur(10px); }
+      .search-bar { background: rgba(255,255,255,0.08); color: #fff; border: 1px solid #333; }
+      .search-bar::placeholder { color: #bbb; }
+    }
+
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      backdrop-filter: blur(8px);
+      background: rgba(255,255,255,0.7);
+      border-bottom: 1px solid var(--border-light);
+      padding: 1rem;
+      text-align: center;
+      transition: background 0.3s;
+    }
+    @media (prefers-color-scheme: dark) {
+      header { background: rgba(18, 20, 27, 0.7); border-color: #2b2f3b; }
     }
 
     h1 {
-      text-align: center;
       color: var(--primary);
-      margin-bottom: 1rem;
-      font-size: 2.2rem;
+      font-size: 2rem;
+      margin: 0;
+      font-weight: 600;
     }
 
     .search-bar {
+      margin: 1rem auto;
       display: block;
-      width: 100%;
+      width: 90%;
       max-width: 400px;
-      margin: 0 auto 2rem;
       padding: 0.6rem 1rem;
       font-size: 1rem;
       border-radius: 12px;
       border: 1px solid #ccc;
-      transition: box-shadow 0.2s;
+      outline: none;
+      transition: all 0.2s ease;
     }
     .search-bar:focus {
-      outline: none;
-      box-shadow: 0 0 8px var(--primary);
+      box-shadow: 0 0 0 3px rgba(0,80,215,0.2);
+      border-color: var(--primary);
     }
 
-    .article {
+    main {
+      flex: 1;
+      padding: 2rem 1rem;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
+      justify-content: center;
+      align-content: start;
+    }
+
+    .card {
       background: var(--card-light);
-      border-radius: 14px;
-      padding: 1.2rem 1.5rem;
-      margin-bottom: 1.5rem;
-      box-shadow: 0 4px 12px var(--shadow);
-      transition: transform 0.2s, box-shadow 0.2s;
-    }
-    .article:hover {
-      transform: translateY(-4px);
+      border-radius: 16px;
+      padding: 1.5rem;
       box-shadow: 0 6px 18px var(--shadow);
+      transition: transform 0.3s, box-shadow 0.3s;
+      animation: fadeIn 0.5s ease forwards;
+    }
+    .card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 8px 24px rgba(0,80,215,0.15);
     }
 
-    .article a { color: var(--primary); text-decoration: none; }
-    .article a:hover { text-decoration: underline; }
-    small { display: block; margin-bottom: 0.5rem; color: #555; font-size: 0.85rem; }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .card h2 {
+      margin: 0 0 0.5rem;
+      font-size: 1.1rem;
+    }
+    .card h2 a {
+      color: var(--primary);
+      text-decoration: none;
+    }
+    .card h2 a:hover {
+      text-decoration: underline;
+    }
+    .card small {
+      display: block;
+      color: #666;
+      margin-bottom: 0.5rem;
+      font-size: 0.85rem;
+    }
+    @media (prefers-color-scheme: dark) {
+      .card small { color: #aaa; }
+    }
 
     footer {
       text-align: center;
-      margin-top: 3rem;
-      color: #777;
+      padding: 2rem 1rem;
       font-size: 0.9rem;
+      color: #666;
+    }
+    @media (prefers-color-scheme: dark) {
+      footer { color: #aaa; }
     }
 
-    @media(max-width:600px){
-      body { padding: 1rem; }
-      h1 { font-size: 1.8rem; }
+    a {
+      color: var(--primary);
+      text-decoration: none;
     }
   </style>
 </head>
 <body>
-  <h1>🛰️ Actualités OVHcloud</h1>
-  <input type="text" id="search" class="search-bar" placeholder="🔍 Rechercher un article...">
-  <div id="feed">Chargement en cours...</div>
+  <header>
+    <h1>🛰️ Actualités OVHcloud</h1>
+    <input type="text" id="search" class="search-bar" placeholder="🔍 Rechercher un article...">
+  </header>
+
+  <main id="feed">Chargement en cours...</main>
+
   <footer>
-    <p>Dernière mise à jour automatique via GitHub Actions</p>
-    <p><a href="rss.xml" target="_blank">📡 Consulter le flux RSS</a> • <a href="feed.json" target="_blank">🗂️ Flux JSON</a></p>
+    <p>Mis à jour automatiquement via GitHub Actions</p>
+    <p>
+      <a href="rss.xml" target="_blank">📡 RSS</a> •
+      <a href="feed.json" target="_blank">🗂️ JSON</a>
+    </p>
   </footer>
 
   <script>
     async function loadFeed() {
       const container = document.getElementById('feed');
-      container.innerHTML = 'Chargement en cours...';
+      container.innerHTML = '<p>Chargement en cours...</p>';
       try {
-        const ts = new Date().getTime();
+        const ts = Date.now();
         const resp = await fetch(`feed.json?ts=${ts}`);
         if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
         const data = await resp.json();
-
         const entries = (data.entries || []).sort((a,b) => new Date(b.published) - new Date(a.published));
 
-        function renderArticle(entry) {
-          const div = document.createElement('div');
-          div.className = 'article';
-          div.innerHTML = `
-            <a href="${entry.link}" target="_blank"><h2>${entry.title}</h2></a>
+        function createCard(entry) {
+          const card = document.createElement('div');
+          card.className = 'card';
+          card.innerHTML = `
+            <h2><a href="${entry.link}" target="_blank">${entry.title}</a></h2>
             <small>${entry.published ? new Date(entry.published).toLocaleDateString('fr-FR') : ''}</small>
             <p>${entry.summary}</p>`;
-          return div;
+          return card;
         }
 
-        function renderFeed(filter='') {
+        function render(filter = '') {
           container.innerHTML = '';
-          const filtered = entries.filter(e => 
+          const filtered = entries.filter(e =>
             e.title.toLowerCase().includes(filter.toLowerCase()) ||
             e.summary.toLowerCase().includes(filter.toLowerCase())
           );
-          if (!filtered.length) container.innerHTML = '<p>Aucun article ne correspond à votre recherche.</p>';
-          filtered.forEach(e => container.appendChild(renderArticle(e)));
+          if (!filtered.length) {
+            container.innerHTML = '<p style="grid-column: 1 / -1; text-align: center;">Aucun article trouvé.</p>';
+            return;
+          }
+          filtered.forEach(entry => container.appendChild(createCard(entry)));
         }
 
         const search = document.getElementById('search');
-        search.addEventListener('input', () => renderFeed(search.value));
-        renderFeed();
-
-      } catch(err) {
+        search.addEventListener('input', () => render(search.value));
+        render();
+      } catch (err) {
         console.error(err);
-        container.innerHTML = '<p style="color:red;">Impossible de charger le flux JSON. Vérifiez que feed.json existe et est valide.</p>';
+        container.innerHTML = '<p style="color:red; grid-column: 1 / -1; text-align: center;">Erreur de chargement du flux JSON.</p>';
       }
     }
-
     loadFeed();
   </script>
 </body>
