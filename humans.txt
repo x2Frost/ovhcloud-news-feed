@@ -1,0 +1,15 @@
+/* TEAM */
+Developer: Nicolas
+Role: Technicien support informatique
+Website: https://x2frost.github.io/ovhcloud-news-feed/
+
+/* SITE */
+Name: ovhcloud-news-feed
+Version: 1.0
+Last update: 23/10/2025
+
+/* THANKS */
+Thanks to all the users, testers, and contributors who make this possible
+
+/* PHILOSOPHY */
+"Code with care, share with joy, and always keep learning."
