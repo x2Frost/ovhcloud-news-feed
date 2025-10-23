@@ -23,20 +23,18 @@
 
     body {
       font-family: "Inter", system-ui, sans-serif;
-      background: var(--bg-light);
-      color: var(--text-light);
       margin: 0;
       transition: background 0.3s, color 0.3s;
+      background: var(--bg-light);
+      color: var(--text-light);
       display: flex;
       flex-direction: column;
       min-height: 100vh;
     }
 
-    @media (prefers-color-scheme: dark) {
-      body { background: var(--bg-dark); color: var(--text-dark); }
-      .card { background: var(--card-dark); backdrop-filter: blur(10px); }
-      .search-bar { background: rgba(255,255,255,0.08); color: #fff; border: 1px solid #333; }
-      .search-bar::placeholder { color: #bbb; }
+    body.dark {
+      background: var(--bg-dark);
+      color: var(--text-dark);
     }
 
     header {
@@ -44,14 +42,16 @@
       top: 0;
       z-index: 10;
       backdrop-filter: blur(8px);
-      background: rgba(255,255,255,0.7);
+      background: rgba(255,255,255,0.8);
       border-bottom: 1px solid var(--border-light);
       padding: 1rem;
       text-align: center;
       transition: background 0.3s;
     }
-    @media (prefers-color-scheme: dark) {
-      header { background: rgba(18, 20, 27, 0.7); border-color: #2b2f3b; }
+
+    body.dark header {
+      background: rgba(18, 20, 27, 0.8);
+      border-color: #2b2f3b;
     }
 
     h1 {
@@ -61,21 +61,55 @@
       font-weight: 600;
     }
 
+    .controls {
+      margin-top: 1rem;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+
+    button, select {
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      padding: 0.5rem 1rem;
+      background: white;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 0.9rem;
+    }
+
+    button:hover, select:hover {
+      background: #eef3ff;
+    }
+
+    body.dark button, body.dark select {
+      background: rgba(255,255,255,0.1);
+      color: #fff;
+      border-color: #333;
+    }
+
     .search-bar {
-      margin: 1rem auto;
       display: block;
+      margin: 1rem auto;
       width: 90%;
       max-width: 400px;
       padding: 0.6rem 1rem;
-      font-size: 1rem;
       border-radius: 12px;
       border: 1px solid #ccc;
       outline: none;
-      transition: all 0.2s ease;
+      transition: box-shadow 0.2s;
     }
+
     .search-bar:focus {
       box-shadow: 0 0 0 3px rgba(0,80,215,0.2);
       border-color: var(--primary);
+    }
+
+    body.dark .search-bar {
+      background: rgba(255,255,255,0.08);
+      color: #fff;
+      border-color: #333;
     }
 
     main {
@@ -85,7 +119,6 @@
       grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
       gap: 1.5rem;
       justify-content: center;
-      align-content: start;
     }
 
     .card {
@@ -93,16 +126,17 @@
       border-radius: 16px;
       padding: 1.5rem;
       box-shadow: 0 6px 18px var(--shadow);
-      transition: transform 0.3s, box-shadow 0.3s;
-      animation: fadeIn 0.5s ease forwards;
+      opacity: 0;
+      transform: translateY(15px);
+      animation: fadeIn 0.6s ease forwards;
     }
-    .card:hover {
-      transform: translateY(-6px);
-      box-shadow: 0 8px 24px rgba(0,80,215,0.15);
+
+    body.dark .card {
+      background: var(--card-dark);
+      backdrop-filter: blur(8px);
     }
 
     @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
       to { opacity: 1; transform: translateY(0); }
     }
 
@@ -110,21 +144,27 @@
       margin: 0 0 0.5rem;
       font-size: 1.1rem;
     }
-    .card h2 a {
+
+    .card a {
       color: var(--primary);
       text-decoration: none;
     }
-    .card h2 a:hover {
-      text-decoration: underline;
-    }
+
+    .card a:hover { text-decoration: underline; }
+
     .card small {
-      display: block;
       color: #666;
+      display: block;
       margin-bottom: 0.5rem;
-      font-size: 0.85rem;
     }
-    @media (prefers-color-scheme: dark) {
-      .card small { color: #aaa; }
+
+    body.dark .card small { color: #aaa; }
+
+    mark {
+      background: #fffa90;
+      color: inherit;
+      padding: 0 2px;
+      border-radius: 3px;
     }
 
     footer {
@@ -133,19 +173,23 @@
       font-size: 0.9rem;
       color: #666;
     }
-    @media (prefers-color-scheme: dark) {
-      footer { color: #aaa; }
-    }
 
-    a {
-      color: var(--primary);
-      text-decoration: none;
-    }
+    body.dark footer { color: #aaa; }
   </style>
 </head>
 <body>
   <header>
     <h1>🛰️ Actualités OVHcloud</h1>
+    <div class="controls">
+      <button id="refresh">🔄 Actualiser</button>
+      <select id="filter">
+        <option value="all">🗓️ Tous</option>
+        <option value="today">Aujourd’hui</option>
+        <option value="7">7 derniers jours</option>
+        <option value="30">30 derniers jours</option>
+      </select>
+      <button id="themeToggle">🌙 Thème</button>
+    </div>
     <input type="text" id="search" class="search-bar" placeholder="🔍 Rechercher un article...">
   </header>
 
@@ -153,54 +197,94 @@
 
   <footer>
     <p>Mis à jour automatiquement via GitHub Actions</p>
-    <p>
-      <a href="rss.xml" target="_blank">📡 RSS</a> •
-      <a href="feed.json" target="_blank">🗂️ JSON</a>
-    </p>
+    <p><a href="rss.xml" target="_blank">📡 RSS</a> • <a href="feed.json" target="_blank">🗂️ JSON</a></p>
   </footer>
 
   <script>
+    const container = document.getElementById('feed');
+    const searchInput = document.getElementById('search');
+    const filterSelect = document.getElementById('filter');
+    const refreshBtn = document.getElementById('refresh');
+    const themeToggle = document.getElementById('themeToggle');
+
+    let entries = [];
+
+    // ---------- Thème clair/sombre ----------
+    if (localStorage.getItem('theme') === 'dark') document.body.classList.add('dark');
+
+    themeToggle.addEventListener('click', () => {
+      document.body.classList.toggle('dark');
+      localStorage.setItem('theme', document.body.classList.contains('dark') ? 'dark' : 'light');
+    });
+
+    // ---------- Calcul du temps écoulé ----------
+    function timeAgo(date) {
+      const diff = (Date.now() - new Date(date)) / 1000;
+      if (diff < 60) return "à l'instant";
+      if (diff < 3600) return `il y a ${Math.floor(diff / 60)} min`;
+      if (diff < 86400) return `il y a ${Math.floor(diff / 3600)} h`;
+      if (diff < 2592000) return `il y a ${Math.floor(diff / 86400)} j`;
+      return new Date(date).toLocaleDateString('fr-FR');
+    }
+
+    // ---------- Chargement du flux ----------
     async function loadFeed() {
-      const container = document.getElementById('feed');
-      container.innerHTML = '<p>Chargement en cours...</p>';
+      container.innerHTML = '<p>Chargement...</p>';
       try {
         const ts = Date.now();
         const resp = await fetch(`feed.json?ts=${ts}`);
-        if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
         const data = await resp.json();
-        const entries = (data.entries || []).sort((a,b) => new Date(b.published) - new Date(a.published));
-
-        function createCard(entry) {
-          const card = document.createElement('div');
-          card.className = 'card';
-          card.innerHTML = `
-            <h2><a href="${entry.link}" target="_blank">${entry.title}</a></h2>
-            <small>${entry.published ? new Date(entry.published).toLocaleDateString('fr-FR') : ''}</small>
-            <p>${entry.summary}</p>`;
-          return card;
-        }
-
-        function render(filter = '') {
-          container.innerHTML = '';
-          const filtered = entries.filter(e =>
-            e.title.toLowerCase().includes(filter.toLowerCase()) ||
-            e.summary.toLowerCase().includes(filter.toLowerCase())
-          );
-          if (!filtered.length) {
-            container.innerHTML = '<p style="grid-column: 1 / -1; text-align: center;">Aucun article trouvé.</p>';
-            return;
-          }
-          filtered.forEach(entry => container.appendChild(createCard(entry)));
-        }
-
-        const search = document.getElementById('search');
-        search.addEventListener('input', () => render(search.value));
+        entries = (data.entries || []).sort((a,b) => new Date(b.published) - new Date(a.published));
         render();
-      } catch (err) {
-        console.error(err);
-        container.innerHTML = '<p style="color:red; grid-column: 1 / -1; text-align: center;">Erreur de chargement du flux JSON.</p>';
+      } catch (e) {
+        console.error(e);
+        container.innerHTML = '<p style="color:red;">Erreur de chargement du flux.</p>';
       }
     }
+
+    refreshBtn.addEventListener('click', loadFeed);
+
+    // ---------- Rendu du flux ----------
+    function render() {
+      const search = searchInput.value.toLowerCase();
+      const filter = filterSelect.value;
+      const now = Date.now();
+
+      container.innerHTML = '';
+      const filtered = entries.filter(e => {
+        const published = new Date(e.published).getTime();
+        if (filter === 'today' && now - published > 86400000) return false;
+        if (filter === '7' && now - published > 7*86400000) return false;
+        if (filter === '30' && now - published > 30*86400000) return false;
+        return e.title.toLowerCase().includes(search) || e.summary.toLowerCase().includes(search);
+      });
+
+      if (!filtered.length) {
+        container.innerHTML = '<p style="grid-column:1/-1;text-align:center;">Aucun article trouvé.</p>';
+        return;
+      }
+
+      filtered.forEach((e, i) => {
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.style.animationDelay = `${i * 0.05}s`;
+
+        const highlightedTitle = e.title.replace(new RegExp(search, 'gi'), match => `<mark>${match}</mark>`);
+        const highlightedSummary = e.summary.replace(new RegExp(search, 'gi'), match => `<mark>${match}</mark>`);
+
+        card.innerHTML = `
+          <h2><a href="${e.link}" target="_blank">${highlightedTitle}</a></h2>
+          <small>${timeAgo(e.published)}</small>
+          <p>${highlightedSummary}</p>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    searchInput.addEventListener('input', render);
+    filterSelect.addEventListener('change', render);
+
+    // ---------- Initialisation ----------
     loadFeed();
   </script>
 </body>
