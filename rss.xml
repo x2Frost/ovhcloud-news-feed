@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<rss version="2.0">
+  <channel>
+    <title>Actualités OVHcloud</title>
+    <link>https://www.ovhcloud.com/fr/</link>
+    <description>Flux RSS des actualités OVHcloud</description>
+  </channel>
+</rss>
