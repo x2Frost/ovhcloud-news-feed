@@ -24,8 +24,3 @@
     }
   ]
 }
-
-
-git add feed.json
-git commit -m "Mise à jour feed.json"
-git push origin main
