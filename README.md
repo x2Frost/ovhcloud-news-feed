@@ -1,17 +1,17 @@
-# 🛰️ OVHcloud News Feed
+# OVHcloud News Feed
 
-Flux RSS fusionné des actualités OVHcloud :
-- Blog officiel : [https://www.ovhcloud.com/fr/blog/](https://www.ovhcloud.com/fr/blog/)
-- Newsroom : [https://press.ovhcloud.com/](https://press.ovhcloud.com/)
-- Articles Télécom : [https://www.ovhcloud.com/fr/blog/tag/telecom/](https://www.ovhcloud.com/fr/blog/tag/telecom/)
+Page HTML + JSON + RSS pour agréger toutes les actualités OVHcloud.
 
-## 🔧 Fonctionnement
+## Utilisation
 
-Ce dépôt :
-- agrège les flux RSS OVHcloud
-- génère un fichier unique `rss.xml`
-- met à jour automatiquement le flux chaque jour à 07h00 (UTC)
+- `index.html` → page principale
+- `feed.json` → flux JSON utilisé par la page
+- `rss.xml` → flux RSS
+- `generate_feed.py` → script Python pour régénérer JSON et RSS
+- `favicon.png` → favicon du site
 
-## 🌍 Accès au flux
+## Déploiement
 
-Une fois GitHub Pages activé :
+1. Pousser tout sur GitHub
+2. Activer GitHub Pages sur la branche principale
+3. Ouvrir `index.html` depuis GitHub Pages
