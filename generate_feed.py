@@ -11,7 +11,8 @@ import json
 SOURCES = [
     "https://www.ovhcloud.com/fr/blog/feed/",
     "https://press.ovhcloud.com/feed/",
-    "https://www.ovhcloud.com/fr/blog/tag/telecom/feed/"
+    "https://www.ovhcloud.com/fr/blog/tag/telecom/feed/",
+    "https://www.ovh.com/fr/blog/tag/security/feed/"
 ]
 
 # ==============================
@@ -102,3 +103,4 @@ if failed_sources:
         print(f" - {f}")
 else:
     print("✅ Tous les flux ont été récupérés avec succès")
+
