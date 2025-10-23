@@ -17,18 +17,9 @@
     }
 
     @media (prefers-color-scheme: dark) {
-      body {
-        background-color: var(--bg-dark);
-        color: var(--text-dark);
-      }
-      .article {
-        background: var(--card-dark);
-      }
-      input {
-        background: #222;
-        color: #fff;
-        border-color: #444;
-      }
+      body { background-color: var(--bg-dark); color: var(--text-dark); }
+      .article { background: var(--card-dark); }
+      input { background: #222; color: #fff; border-color: #444; }
     }
 
     body {
@@ -42,11 +33,7 @@
       transition: background-color 0.3s, color 0.3s;
     }
 
-    h1 {
-      color: var(--ovh-blue);
-      text-align: center;
-      margin-bottom: 1rem;
-    }
+    h1 { color: var(--ovh-blue); text-align: center; margin-bottom: 1rem; }
 
     .search-bar {
       display: block;
@@ -60,10 +47,7 @@
       transition: box-shadow 0.3s;
     }
 
-    .search-bar:focus {
-      outline: none;
-      box-shadow: 0 0 5px var(--ovh-blue);
-    }
+    .search-bar:focus { outline: none; box-shadow: 0 0 5px var(--ovh-blue); }
 
     .article {
       background: var(--card-light);
@@ -74,38 +58,19 @@
       transition: transform 0.2s;
     }
 
-    .article:hover {
-      transform: translateY(-3px);
-    }
+    .article:hover { transform: translateY(-3px); }
 
-    a {
-      color: var(--ovh-blue);
-      text-decoration: none;
-    }
+    a { color: var(--ovh-blue); text-decoration: none; }
+    a:hover { text-decoration: underline; }
 
-    a:hover {
-      text-decoration: underline;
-    }
+    small { color: #555; display: block; margin-bottom: 0.5rem; }
 
-    small {
-      color: #555;
-      display: block;
-      margin-bottom: 0.5rem;
-    }
-
-    footer {
-      text-align: center;
-      margin-top: 2rem;
-      color: #777;
-      font-size: 0.9rem;
-    }
+    footer { text-align: center; margin-top: 2rem; color: #777; font-size: 0.9rem; }
   </style>
 </head>
 <body>
   <h1>🛰️ Actualités OVHcloud</h1>
-
   <input type="text" id="search" class="search-bar" placeholder="🔍 Rechercher un article...">
-
   <div id="feed">Chargement en cours...</div>
 
   <footer>
@@ -115,20 +80,22 @@
 
   <script>
     async function loadFeed() {
-      try {
-        const response = await fetch('feed.json');
-        const data = await response.json();
-        const container = document.getElementById('feed');
-        container.innerHTML = '';
+      const container = document.getElementById('feed');
+      container.innerHTML = 'Chargement en cours...';
 
-        // 🔹 Tri par date décroissante
-        const sortedEntries = data.entries.sort((a, b) => {
+      try {
+        // 🔹 Cache-busting pour forcer le navigateur à récupérer la dernière version
+        const timestamp = new Date().getTime();
+        const response = await fetch(`feed.json?ts=${timestamp}`);
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const data = await response.json();
+
+        const sortedEntries = (data.entries || []).sort((a, b) => {
           const dateA = new Date(a.published);
           const dateB = new Date(b.published);
           return dateB - dateA;
         });
 
-        // 🔹 Rendu d’un article
         function renderArticle(entry) {
           const article = document.createElement('div');
           article.className = 'article';
@@ -140,32 +107,27 @@
           return article;
         }
 
-        // 🔹 Fonction d’affichage avec filtrage
         function renderFeed(filter = '') {
           container.innerHTML = '';
           const filtered = sortedEntries.filter(e =>
             e.title.toLowerCase().includes(filter.toLowerCase()) ||
             e.summary.toLowerCase().includes(filter.toLowerCase())
           );
-
           if (filtered.length === 0) {
             container.innerHTML = '<p>Aucun article ne correspond à ta recherche.</p>';
             return;
           }
-
           filtered.forEach(entry => container.appendChild(renderArticle(entry)));
         }
 
-        // 🔹 Champ de recherche
         const searchBar = document.getElementById('search');
         searchBar.addEventListener('input', () => renderFeed(searchBar.value));
 
-        // Premier rendu
         renderFeed();
 
-      } catch (error) {
-        document.getElementById('feed').innerText = 'Erreur de chargement du flux.';
-        console.error(error);
+      } catch (err) {
+        console.error(err);
+        container.innerHTML = '<p style="color:red;">Impossible de charger le flux JSON. Vérifie que feed.json existe et est valide.</p>';
       }
     }
 
