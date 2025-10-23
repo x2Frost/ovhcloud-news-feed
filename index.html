@@ -55,30 +55,75 @@
   </footer>
 
   <script>
-    async function loadFeed() {
-      try {
-        const response = await fetch('feed.json');
-        const data = await response.json();
-        const container = document.getElementById('feed');
-        container.innerHTML = '';
+   async function loadFeed() {
+    try {
+      const response = await fetch('feed.json');
+      const data = await response.json();
+      const container = document.getElementById('feed');
+      container.innerHTML = '';
 
-        data.entries.forEach(entry => {
-          const article = document.createElement('div');
-          article.className = 'article';
-          article.innerHTML = `
-            <a href="${entry.link}" target="_blank"><h2>${entry.title}</h2></a>
-            <small>Publié le : ${entry.published || 'date inconnue'}</small>
-            <p>${entry.summary}</p>
-          `;
-          container.appendChild(article);
-        });
-      } catch (error) {
-        document.getElementById('feed').innerText = 'Erreur de chargement du flux.';
-        console.error(error);
+      // 🔹 Trier les articles par date décroissante
+      const sortedEntries = data.entries.sort((a, b) => {
+        const dateA = new Date(a.published);
+        const dateB = new Date(b.published);
+        return dateB - dateA; // plus récent d'abord
+      });
+
+      // 🔹 Fonction d’affichage d’un article
+      function renderArticle(entry) {
+        const article = document.createElement('div');
+        article.className = 'article';
+        article.innerHTML = `
+          <a href="${entry.link}" target="_blank"><h2>${entry.title}</h2></a>
+          <small>Publié le : ${entry.published ? new Date(entry.published).toLocaleDateString('fr-FR') : 'date inconnue'}</small>
+          <p>${entry.summary}</p>
+        `;
+        return article;
       }
-    }
 
-    loadFeed();
+      // 🔹 Fonction de rendu (avec filtrage si recherche)
+      function renderFeed(filter = '') {
+        container.innerHTML = '';
+        const filtered = sortedEntries.filter(e => 
+          e.title.toLowerCase().includes(filter.toLowerCase()) ||
+          e.summary.toLowerCase().includes(filter.toLowerCase())
+        );
+
+        if (filtered.length === 0) {
+          container.innerHTML = '<p>Aucun article ne correspond à ta recherche.</p>';
+          return;
+        }
+
+        filtered.forEach(entry => container.appendChild(renderArticle(entry)));
+      }
+
+      // 🔹 Champ de recherche
+      const searchBar = document.createElement('input');
+      searchBar.type = 'text';
+      searchBar.placeholder = '🔍 Rechercher un article...';
+      searchBar.style = `
+        display: block;
+        width: 100%;
+        max-width: 400px;
+        margin: 0 auto 1rem;
+        padding: 0.5rem 1rem;
+        font-size: 1rem;
+        border-radius: 8px;
+        border: 1px solid #ccc;
+      `;
+      document.body.insertBefore(searchBar, container);
+
+      // 🔹 Filtrage en temps réel
+      searchBar.addEventListener('input', () => renderFeed(searchBar.value));
+
+      // Premier affichage complet
+      renderFeed();
+    } catch (error) {
+      document.getElementById('feed').innerText = 'Erreur de chargement du flux.';
+      console.error(error);
+    }
+  }
+  loadFeed();
   </script>
 </body>
 </html>
