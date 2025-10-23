@@ -85,3 +85,27 @@ for entry in entries:
 
 fg.rss_file("rss.xml")
 print("✅ Flux RSS généré avec succès : rss.xml")
+import json
+
+# ==============================
+# 💾 Génération du fichier JSON
+# ==============================
+json_feed = {
+    "title": "Actualités OVHcloud (blog + presse + télécom)",
+    "updated": datetime.utcnow().isoformat(),
+    "source_count": len(SOURCES),
+    "entries": []
+}
+
+for entry in entries:
+    json_feed["entries"].append({
+        "title": entry.title,
+        "link": entry.link,
+        "published": getattr(entry, "published", ""),
+        "summary": clean_html(getattr(entry, "summary", ""))
+    })
+
+with open("feed.json", "w", encoding="utf-8") as f:
+    json.dump(json_feed, f, ensure_ascii=False, indent=2)
+
+print("✅ Flux JSON généré avec succès : feed.json")
