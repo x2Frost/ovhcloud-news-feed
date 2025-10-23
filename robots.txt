@@ -1,0 +1,11 @@
+# robots.txt pour https://x2frost.github.io/ovhcloud-news-feed/
+
+User-agent: *
+Allow: /
+
+# Empêche l'indexation des fichiers techniques
+Disallow: /feed.json
+Disallow: /rss.xml
+
+# Emplacement du sitemap (facultatif, mais propre)
+Sitemap: https://x2frost.github.io/ovhcloud-news-feed/rss.xml
