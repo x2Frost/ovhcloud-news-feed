@@ -5,125 +5,171 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Actualités OVHcloud</title>
   <link rel="icon" type="image/png" href="favicon.png">
-  <link rel="shortcut icon" href="favicon.png" type="image/png">
   <style>
+    :root {
+      --ovh-blue: #0050d7;
+      --bg-light: #f5f6fa;
+      --bg-dark: #1a1d23;
+      --text-light: #222;
+      --text-dark: #eee;
+      --card-light: #fff;
+      --card-dark: #2b303a;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      body {
+        background-color: var(--bg-dark);
+        color: var(--text-dark);
+      }
+      .article {
+        background: var(--card-dark);
+      }
+      input {
+        background: #222;
+        color: #fff;
+        border-color: #444;
+      }
+    }
+
     body {
-      font-family: system-ui, sans-serif;
-      background-color: #f7f7f9;
-      color: #222;
+      font-family: system-ui, -apple-system, sans-serif;
+      background-color: var(--bg-light);
+      color: var(--text-light);
       margin: 2rem auto;
       max-width: 900px;
       line-height: 1.6;
+      padding: 0 1rem;
+      transition: background-color 0.3s, color 0.3s;
     }
+
     h1 {
-      color: #0050d7;
+      color: var(--ovh-blue);
       text-align: center;
       margin-bottom: 1rem;
     }
+
+    .search-bar {
+      display: block;
+      width: 100%;
+      max-width: 400px;
+      margin: 0.5rem auto 1.5rem;
+      padding: 0.6rem 1rem;
+      font-size: 1rem;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      transition: box-shadow 0.3s;
+    }
+
+    .search-bar:focus {
+      outline: none;
+      box-shadow: 0 0 5px var(--ovh-blue);
+    }
+
     .article {
-      background: #fff;
+      background: var(--card-light);
       padding: 1rem 1.5rem;
       border-radius: 12px;
       box-shadow: 0 1px 5px rgba(0,0,0,0.1);
-      margin-bottom: 1rem;
+      margin-bottom: 1.2rem;
+      transition: transform 0.2s;
     }
+
+    .article:hover {
+      transform: translateY(-3px);
+    }
+
     a {
-      color: #0050d7;
+      color: var(--ovh-blue);
       text-decoration: none;
     }
+
     a:hover {
       text-decoration: underline;
     }
+
     small {
       color: #555;
       display: block;
       margin-bottom: 0.5rem;
     }
+
     footer {
       text-align: center;
       margin-top: 2rem;
-      color: #666;
+      color: #777;
+      font-size: 0.9rem;
     }
   </style>
 </head>
 <body>
   <h1>🛰️ Actualités OVHcloud</h1>
+
+  <input type="text" id="search" class="search-bar" placeholder="🔍 Rechercher un article...">
+
   <div id="feed">Chargement en cours...</div>
 
   <footer>
     <p>Dernière mise à jour automatique via GitHub Actions</p>
+    <p><a href="rss.xml" target="_blank">📡 Consulter le flux RSS XML</a> • <a href="feed.json" target="_blank">🗂️ Flux JSON</a></p>
   </footer>
 
   <script>
-   async function loadFeed() {
-    try {
-      const response = await fetch('feed.json');
-      const data = await response.json();
-      const container = document.getElementById('feed');
-      container.innerHTML = '';
-
-      // 🔹 Trier les articles par date décroissante
-      const sortedEntries = data.entries.sort((a, b) => {
-        const dateA = new Date(a.published);
-        const dateB = new Date(b.published);
-        return dateB - dateA; // plus récent d'abord
-      });
-
-      // 🔹 Fonction d’affichage d’un article
-      function renderArticle(entry) {
-        const article = document.createElement('div');
-        article.className = 'article';
-        article.innerHTML = `
-          <a href="${entry.link}" target="_blank"><h2>${entry.title}</h2></a>
-          <small>Publié le : ${entry.published ? new Date(entry.published).toLocaleDateString('fr-FR') : 'date inconnue'}</small>
-          <p>${entry.summary}</p>
-        `;
-        return article;
-      }
-
-      // 🔹 Fonction de rendu (avec filtrage si recherche)
-      function renderFeed(filter = '') {
+    async function loadFeed() {
+      try {
+        const response = await fetch('feed.json');
+        const data = await response.json();
+        const container = document.getElementById('feed');
         container.innerHTML = '';
-        const filtered = sortedEntries.filter(e => 
-          e.title.toLowerCase().includes(filter.toLowerCase()) ||
-          e.summary.toLowerCase().includes(filter.toLowerCase())
-        );
 
-        if (filtered.length === 0) {
-          container.innerHTML = '<p>Aucun article ne correspond à ta recherche.</p>';
-          return;
+        // 🔹 Tri par date décroissante
+        const sortedEntries = data.entries.sort((a, b) => {
+          const dateA = new Date(a.published);
+          const dateB = new Date(b.published);
+          return dateB - dateA;
+        });
+
+        // 🔹 Rendu d’un article
+        function renderArticle(entry) {
+          const article = document.createElement('div');
+          article.className = 'article';
+          article.innerHTML = `
+            <a href="${entry.link}" target="_blank"><h2>${entry.title}</h2></a>
+            <small>Publié le : ${entry.published ? new Date(entry.published).toLocaleDateString('fr-FR') : 'Date inconnue'}</small>
+            <p>${entry.summary}</p>
+          `;
+          return article;
         }
 
-        filtered.forEach(entry => container.appendChild(renderArticle(entry)));
+        // 🔹 Fonction d’affichage avec filtrage
+        function renderFeed(filter = '') {
+          container.innerHTML = '';
+          const filtered = sortedEntries.filter(e =>
+            e.title.toLowerCase().includes(filter.toLowerCase()) ||
+            e.summary.toLowerCase().includes(filter.toLowerCase())
+          );
+
+          if (filtered.length === 0) {
+            container.innerHTML = '<p>Aucun article ne correspond à ta recherche.</p>';
+            return;
+          }
+
+          filtered.forEach(entry => container.appendChild(renderArticle(entry)));
+        }
+
+        // 🔹 Champ de recherche
+        const searchBar = document.getElementById('search');
+        searchBar.addEventListener('input', () => renderFeed(searchBar.value));
+
+        // Premier rendu
+        renderFeed();
+
+      } catch (error) {
+        document.getElementById('feed').innerText = 'Erreur de chargement du flux.';
+        console.error(error);
       }
-
-      // 🔹 Champ de recherche
-      const searchBar = document.createElement('input');
-      searchBar.type = 'text';
-      searchBar.placeholder = '🔍 Rechercher un article...';
-      searchBar.style = `
-        display: block;
-        width: 100%;
-        max-width: 400px;
-        margin: 0 auto 1rem;
-        padding: 0.5rem 1rem;
-        font-size: 1rem;
-        border-radius: 8px;
-        border: 1px solid #ccc;
-      `;
-      document.body.insertBefore(searchBar, container);
-
-      // 🔹 Filtrage en temps réel
-      searchBar.addEventListener('input', () => renderFeed(searchBar.value));
-
-      // Premier affichage complet
-      renderFeed();
-    } catch (error) {
-      document.getElementById('feed').innerText = 'Erreur de chargement du flux.';
-      console.error(error);
     }
-  }
-  loadFeed();
+
+    loadFeed();
   </script>
 </body>
 </html>
